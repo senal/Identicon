@@ -7,10 +7,20 @@ defmodule Identicon do
       |> filter_odd_squares
       |> build_pixel_map
       |> draw_image
+      |> save_image(input)
+  end
+
+  def save_image(image, input) do
+    File.write("#{input}.png", image)
   end
 
   def draw_image(%Identicon.Image{color: color, pixel_map: pixel_map}) do
-    
+      image = :egd.create(250, 250)
+      fill = :egd.color(color)
+      Enum.each pixel_map, fn({start, stop}) ->
+        :egd.filledRectangle(image, start, stop, fill)
+      end
+      :egd.render(image)
   end
 
   def pick_color(%Identicon.Image{hex: [r, g, b | _rest] } = image) do
@@ -56,6 +66,7 @@ defmodule Identicon do
   def hash_input(input) do
       hex = :crypto.hash(:md5, input)
       |> :binary.bin_to_list
+      
       %Identicon.Image{hex: hex}
   end
 end
